@@ -1,0 +1,3 @@
+/home/mayta/Desktop/CompilersTheory/StatComP/build/CMakeFiles/StatComp.dir
+/home/mayta/Desktop/CompilersTheory/StatComP/build/CMakeFiles/edit_cache.dir
+/home/mayta/Desktop/CompilersTheory/StatComP/build/CMakeFiles/rebuild_cache.dir
