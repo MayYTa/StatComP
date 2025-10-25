@@ -16,12 +16,41 @@ expr
     | '(' expr ')'                        # exprPar
     | num                                 # exprLiteral
     | ID                                  # exprVar
-    | ID '[' pos ']'                     # exprArrayAccess
+    | ID '[' pos ']'                      # exprArrayAccess
+    | statFunc LPAR expr RPAR               # exprStatFunc
+    | tableFunc LPAR expr RPAR              # exprTableFunc
+    ;
+
+statFunc
+    :'Mean'
+    |'Median'
+    |'Mode'
+    |'Stdev'
+    |'Var'
+    |'Square_root'
+    ;
+
+tableFunc
+    : 'Freq'
+    | 'AbsFreq'
+    | 'RelFreq'
+    | 'AbsFreqCum'
+    | 'RelFreqCum'
     ;
 
 arrayInit
-    : '{' (num (',' num)*)? '}'
+    : LBRACE numlist? RBRACE
+    ;  
+
+numlist
+    : num (COMMA num)*
+    ; 
+
+row : LBRACE (num (COMMA num)*)? RBRACE 
     ;
+
+
+
 
 num  : INT | FLOAT ;
 decltype : TINT | TFLOAT ;
