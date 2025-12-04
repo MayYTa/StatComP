@@ -12,10 +12,12 @@
 class  StatCompLexer : public antlr4::Lexer {
 public:
   enum {
-    T__0 = 1, POW = 2, ADD = 3, SUB = 4, MUL = 5, DIV = 6, INTDIV = 7, MOD = 8, 
-    ASSIGN = 9, LPAR = 10, RPAR = 11, COLON = 12, LBRACE = 13, RBRACE = 14, 
-    LBRACK = 15, RBRACK = 16, COMMA = 17, TINT = 18, TFLOAT = 19, ARRAY = 20, 
-    ID = 21, INT = 22, FLOAT = 23, WS = 24
+    T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
+    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, POW = 13, ADD = 14, 
+    SUB = 15, MUL = 16, DIV = 17, INTDIV = 18, MOD = 19, ASSIGN = 20, LPAR = 21, 
+    RPAR = 22, COLON = 23, LBRACE = 24, RBRACE = 25, LBRACK = 26, RBRACK = 27, 
+    COMMA = 28, TINT = 29, TFLOAT = 30, ARRAY = 31, ID = 32, INT = 33, FLOAT = 34, 
+    WS = 35
   };
 
   explicit StatCompLexer(antlr4::CharStream *input);

@@ -35,6 +35,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitExprTableFunc(StatCompParser::ExprTableFuncContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitExprPar(StatCompParser::ExprParContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -63,7 +67,27 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitExprStatFunc(StatCompParser::ExprStatFuncContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitStatFunc(StatCompParser::StatFuncContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitTableFunc(StatCompParser::TableFuncContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitArrayInit(StatCompParser::ArrayInitContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitNumlist(StatCompParser::NumlistContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitRow(StatCompParser::RowContext *ctx) override {
     return visitChildren(ctx);
   }
 

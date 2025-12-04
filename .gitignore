@@ -1,4 +1,9 @@
 # archivos ignorados localmente
-/build/
+build/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+*.obj
+*.exe
+*.log
 
-.cache/clangd/

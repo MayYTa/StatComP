@@ -12,15 +12,18 @@
 class  StatCompParser : public antlr4::Parser {
 public:
   enum {
-    T__0 = 1, POW = 2, ADD = 3, SUB = 4, MUL = 5, DIV = 6, INTDIV = 7, MOD = 8, 
-    ASSIGN = 9, LPAR = 10, RPAR = 11, COLON = 12, LBRACE = 13, RBRACE = 14, 
-    LBRACK = 15, RBRACK = 16, COMMA = 17, TINT = 18, TFLOAT = 19, ARRAY = 20, 
-    ID = 21, INT = 22, FLOAT = 23, WS = 24
+    T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
+    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, POW = 13, ADD = 14, 
+    SUB = 15, MUL = 16, DIV = 17, INTDIV = 18, MOD = 19, ASSIGN = 20, LPAR = 21, 
+    RPAR = 22, COLON = 23, LBRACE = 24, RBRACE = 25, LBRACK = 26, RBRACK = 27, 
+    COMMA = 28, TINT = 29, TFLOAT = 30, ARRAY = 31, ID = 32, INT = 33, FLOAT = 34, 
+    WS = 35
   };
 
   enum {
-    RuleProg = 0, RuleStmt = 1, RuleExpr = 2, RuleArrayInit = 3, RuleNum = 4, 
-    RuleDecltype = 5, RulePos = 6
+    RuleProg = 0, RuleStmt = 1, RuleExpr = 2, RuleStatFunc = 3, RuleTableFunc = 4, 
+    RuleArrayInit = 5, RuleNumlist = 6, RuleRow = 7, RuleNum = 8, RuleDecltype = 9, 
+    RulePos = 10
   };
 
   explicit StatCompParser(antlr4::TokenStream *input);
@@ -43,7 +46,11 @@ public:
   class ProgContext;
   class StmtContext;
   class ExprContext;
+  class StatFuncContext;
+  class TableFuncContext;
   class ArrayInitContext;
+  class NumlistContext;
+  class RowContext;
   class NumContext;
   class DecltypeContext;
   class PosContext; 
@@ -134,6 +141,18 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  ExprTableFuncContext : public ExprContext {
+  public:
+    ExprTableFuncContext(ExprContext *ctx);
+
+    TableFuncContext *tableFunc();
+    antlr4::tree::TerminalNode *LPAR();
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *RPAR();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  ExprParContext : public ExprContext {
   public:
     ExprParContext(ExprContext *ctx);
@@ -212,11 +231,78 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  ExprStatFuncContext : public ExprContext {
+  public:
+    ExprStatFuncContext(ExprContext *ctx);
+
+    StatFuncContext *statFunc();
+    antlr4::tree::TerminalNode *LPAR();
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *RPAR();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   ExprContext* expr();
   ExprContext* expr(int precedence);
+  class  StatFuncContext : public antlr4::ParserRuleContext {
+  public:
+    StatFuncContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  StatFuncContext* statFunc();
+
+  class  TableFuncContext : public antlr4::ParserRuleContext {
+  public:
+    TableFuncContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  TableFuncContext* tableFunc();
+
   class  ArrayInitContext : public antlr4::ParserRuleContext {
   public:
     ArrayInitContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *LBRACE();
+    antlr4::tree::TerminalNode *RBRACE();
+    NumlistContext *numlist();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ArrayInitContext* arrayInit();
+
+  class  NumlistContext : public antlr4::ParserRuleContext {
+  public:
+    NumlistContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<NumContext *> num();
+    NumContext* num(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  NumlistContext* numlist();
+
+  class  RowContext : public antlr4::ParserRuleContext {
+  public:
+    RowContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LBRACE();
     antlr4::tree::TerminalNode *RBRACE();
@@ -230,7 +316,7 @@ public:
    
   };
 
-  ArrayInitContext* arrayInit();
+  RowContext* row();
 
   class  NumContext : public antlr4::ParserRuleContext {
   public:

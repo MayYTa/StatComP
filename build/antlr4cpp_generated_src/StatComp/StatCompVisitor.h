@@ -29,6 +29,8 @@ public:
 
     virtual std::any visitExprNeg(StatCompParser::ExprNegContext *context) = 0;
 
+    virtual std::any visitExprTableFunc(StatCompParser::ExprTableFuncContext *context) = 0;
+
     virtual std::any visitExprPar(StatCompParser::ExprParContext *context) = 0;
 
     virtual std::any visitExprAddSub(StatCompParser::ExprAddSubContext *context) = 0;
@@ -43,7 +45,17 @@ public:
 
     virtual std::any visitExprMulDiv(StatCompParser::ExprMulDivContext *context) = 0;
 
+    virtual std::any visitExprStatFunc(StatCompParser::ExprStatFuncContext *context) = 0;
+
+    virtual std::any visitStatFunc(StatCompParser::StatFuncContext *context) = 0;
+
+    virtual std::any visitTableFunc(StatCompParser::TableFuncContext *context) = 0;
+
     virtual std::any visitArrayInit(StatCompParser::ArrayInitContext *context) = 0;
+
+    virtual std::any visitNumlist(StatCompParser::NumlistContext *context) = 0;
+
+    virtual std::any visitRow(StatCompParser::RowContext *context) = 0;
 
     virtual std::any visitNum(StatCompParser::NumContext *context) = 0;
 
