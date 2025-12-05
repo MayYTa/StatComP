@@ -1,4 +1,43 @@
-1 + 2 (5 * 6 / 4) ;
-int x = 45 ;
-float y = 10.53 ; 
-array int arreglo = {0,1,2} ;
+10;
+3.14;
+-5;
+
+2 + 3;
+4 - 1;
+6 * 7;
+8 / 2;
+9 // 2;
+10 % 3;
+2 ^ 3;
+
+(1 + 2) * 3;
+
+
+int Vari = 5;
+float vari= 3.45;
+
+
+array int nums = {1, 2, 3, 4, 5};
+nums[0];
+nums[2];
+
+
+Mean(nums);
+Median(nums);
+Mode(nums);
+Var(nums);
+Stdev(nums);
+Square_root(Var(nums));
+
+
+Freq(nums);
+AbsFreq(nums);
+RelFreq(nums);
+AbsFreqCum(nums);
+RelFreqCum(nums);
+
+
+Square_root(Mean(nums) + Var(nums));
+Mean(nums) + Median(nums) * Mode(nums);
+(Mean(nums) + Median(nums)) / Stdev(nums);
+
