@@ -1,0 +1,119 @@
+
+
+"";
+"=== DEMO DE TABLAS DE FRECUENCIAS ===";
+"";
+
+"--- Test 1: Frecuencias Absolutas (Freq/AbsFreq) ---";
+"";
+
+"Dataset 1: Calificaciones de estudiantes (escala 0-100)";
+array float calificaciones = {85, 90, 85, 95, 90, 85, 88, 95, 90, 85};
+
+"Tabla de Frecuencias Absolutas (cantidad de ocurrencias):";
+Freq(calificaciones);
+
+"";
+"=== EXPLICACIÓN ===";
+"Cada valor único del array se cuenta cuántas veces aparece";
+"Ejemplo: 85 aparece 4 veces, 90 aparece 3 veces, etc.";
+"";
+
+"";
+"--- Test 2: Frecuencias Relativas (RelFreq) ---";
+"";
+
+"Mismos datos con frecuencias relativas (proporción del total):";
+RelFreq(calificaciones);
+
+"";
+"=== EXPLICACIÓN ===";
+"Cada frecuencia se divide por el total de elementos (10)";
+"Ejemplo: 85 aparece 4 veces = 4/10 = 0.4000 (40%)";
+"";
+
+"";
+"--- Test 3: Otra distribución de datos ---";
+"";
+
+"Dataset 2: Resultados de dados (valores 1-6)";
+array float dados = {1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6};
+
+"Tabla de Frecuencias Absolutas:";
+AbsFreq(dados);
+
+"";
+
+"";
+"--- Test 4: Dataset con pocos valores únicos ---";
+"";
+
+"Dataset 3: Respuestas de encuesta (Sí/No = 1/0)";
+array float respuestas = {1, 0, 1, 1, 0, 1, 1, 1, 0, 1};
+
+"Frecuencias de respuestas (1=Sí, 0=No):";
+Freq(respuestas);
+
+"";
+"Frecuencias relativas (proporción):";
+RelFreq(respuestas);
+
+"";
+
+"";
+"--- Test 5: Análisis Combinado ---";
+"";
+
+"Dataset 4: Puntuaciones en test";
+array float puntuaciones = {70, 80, 75, 80, 70, 90, 75, 80, 85, 90};
+
+"Estadísticas descriptivas:";
+"Media:";
+Mean(puntuaciones);
+"Moda (valor más frecuente - ver tabla abajo):";
+"";
+
+"Distribución de frecuencias:";
+Freq(puntuaciones);
+
+"";
+
+"";
+"--- Test 6: Datos Reales - Temperatura Diaria ---";
+"";
+
+"Dataset 5: Temperaturas registradas (°C)";
+array float temperaturas = {20, 22, 22, 21, 23, 22, 21, 20, 24, 23};
+
+"Tabla de frecuencias de temperaturas:";
+Freq(temperaturas);
+
+"Análisis:";
+"Temperatura mínima:";
+Min(temperaturas);
+"Temperatura máxima:";
+Max(temperaturas);
+"Temperatura promedio:";
+Mean(temperaturas);
+
+"";
+"Proporciones de temperaturas:";
+RelFreq(temperaturas);
+
+"";
+
+"";
+"=== RESUMEN DE FUNCIONALIDADES ===";
+"";
+"Funciones de tabla implementadas:";
+"✓ Freq() / AbsFreq()  - Frecuencias absolutas";
+"✓ RelFreq()           - Frecuencias relativas";
+"";
+"Funciones no implementadas aún:";
+"✗ AbsFreqCum()        - Frecuencias acumuladas absolutas";
+"✗ RelFreqCum()        - Frecuencias acumuladas relativas";
+"✗ CrossTab()          - Tabla cruzada (requiere 2+ arrays)";
+"";
+
+"=== FIN DE DEMOSTRACIÓN ===";
+"";

@@ -46,6 +46,7 @@ private:
     Value* tableHeaderFormat;
     Value* tableLineFormat;
     Value* tableRelFreqFormat;
+    Value* tableRelFreqHeaderFormat;
     Value* tableFooterFormat;
     
     std::map<std::string, AllocaInst*> namedValues;
@@ -205,7 +206,12 @@ private:
         
         vector<Value*> values = getArrayValues(arrayName);
         
-        irBuilder->CreateCall(printfFunc, {tableHeaderFormat});
+        // Usar header diferente según el tipo de tabla
+        if (tableType == "RelFreq") {
+            irBuilder->CreateCall(printfFunc, {tableRelFreqHeaderFormat});
+        } else {
+            irBuilder->CreateCall(printfFunc, {tableHeaderFormat});
+        }
         
         for (int i = 0; i < arraySize; i++) {
             Value *currentValue = values[i];
@@ -289,17 +295,21 @@ public:
         GlobalVariable *gVar = new GlobalVariable(*module, s->getType(), true, GlobalValue::PrivateLinkage, s, ". str");
         formatStr = irBuilder->CreateInBoundsGEP(s->getType(), gVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
 
-        Constant *headerStr = ConstantDataArray::getString(*context, "\n===== TABLA DE FRECUENCIAS =====\n");
+        Constant *headerStr = ConstantDataArray::getString(*context, "\n===== TABLA DE FRECUENCIAS =====\nValor    Frecuencia\n--------------------------------\n");
         GlobalVariable *headerVar = new GlobalVariable(*module, headerStr->getType(), true, GlobalValue::PrivateLinkage, headerStr, ".str_header");
         tableHeaderFormat = irBuilder->CreateInBoundsGEP(headerStr->getType(), headerVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
 
-        Constant *lineStr = ConstantDataArray::getString(*context, "  %. 2f    %d\n");
+        Constant *lineStr = ConstantDataArray::getString(*context, "%.2f        %d\n");
         GlobalVariable *lineVar = new GlobalVariable(*module, lineStr->getType(), true, GlobalValue::PrivateLinkage, lineStr, ".str_line");
         tableLineFormat = irBuilder->CreateInBoundsGEP(lineStr->getType(), lineVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
 
-        Constant *relFreqStr = ConstantDataArray::getString(*context, "  %.2f    %. 4f\n");
+        Constant *relFreqStr = ConstantDataArray::getString(*context, "%.2f        %.4f\n");
         GlobalVariable *relFreqVar = new GlobalVariable(*module, relFreqStr->getType(), true, GlobalValue::PrivateLinkage, relFreqStr, ".str_relfreq");
         tableRelFreqFormat = irBuilder->CreateInBoundsGEP(relFreqStr->getType(), relFreqVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
+
+        Constant *relFreqHeaderStr = ConstantDataArray::getString(*context, "\n===== TABLA DE FRECUENCIAS =====\nValor    Freq. Relativa\n--------------------------------\n");
+        GlobalVariable *relFreqHeaderVar = new GlobalVariable(*module, relFreqHeaderStr->getType(), true, GlobalValue::PrivateLinkage, relFreqHeaderStr, ".str_relfreq_header");
+        tableRelFreqHeaderFormat = irBuilder->CreateInBoundsGEP(relFreqHeaderStr->getType(), relFreqHeaderVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
 
         Constant *footerStr = ConstantDataArray::getString(*context, "================================\n\n");
         GlobalVariable *footerVar = new GlobalVariable(*module, footerStr->getType(), true, GlobalValue::PrivateLinkage, footerStr, ".str_footer");
@@ -597,7 +607,6 @@ public:
             cerr << "[ERROR] '" << arrayName << "' no es un array definido" << endl;
             return nullptr;
         }
-        cout << "[INFO] Generando tabla: " << funcName << "(" << arrayName << ")" << endl;
         if (funcName == "Freq" || funcName == "AbsFreq") {
             printFrequencyTable(arrayName, funcName);
         }
