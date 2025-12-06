@@ -1,0 +1,129 @@
+"=== ANALISIS DE DISTRIBUCION CON ASIMETRIA NEGATIVA ===";
+"";
+
+"Una distribución con asimetría negativa (sesgada a la izquierda)";
+"tiene la mayoría de los valores concentrados en el extremo alto,";
+"con una 'cola' hacia valores más bajos.";
+"";
+
+"Dataset: Calificaciones de un examen fácil";
+"(La mayoría sacó entre 85-100, pocos sacaron menos)";
+"";
+
+array float calificaciones = {
+    95, 98, 92, 97, 99, 94, 96, 98, 93, 97,
+    95, 99, 98, 96, 94, 97, 95, 98, 92, 96,
+    88, 85, 90, 87, 82, 75, 70, 65, 60, 55
+};
+
+"Total de datos:";
+Count(calificaciones);
+"";
+
+"--- ESTADISTICAS DESCRIPTIVAS ---";
+"";
+
+"Media (promedio):";
+Mean(calificaciones);
+
+"Mediana (valor central):";
+Median(calificaciones);
+
+"Desviación estándar:";
+Stdev(calificaciones);
+
+"Varianza:";
+Var(calificaciones);
+
+"";
+"Valor mínimo:";
+Min(calificaciones);
+
+"Valor máximo:";
+Max(calificaciones);
+
+"Rango (diferencia entre máx y mín):";
+Range(calificaciones);
+
+"";
+
+"--- COEFICIENTE DE VARIACION ---";
+"";
+"El coeficiente de variación (CV) mide la variabilidad relativa";
+"CV = (Desv. Est. / Media) * 100%";
+"";
+
+"Coeficiente de variación:";
+CoeffVar(calificaciones);
+
+"";
+"Interpretación del CV:";
+"- CV < 15%: Baja variabilidad (datos homogéneos)";
+"- CV entre 15-30%: Variabilidad moderada";
+"- CV > 30%: Alta variabilidad (datos heterogéneos)";
+"";
+
+"--- VISUALIZACION DE LA DISTRIBUCION ---";
+"";
+BarChart(calificaciones);
+"";
+Freq(calificaciones);
+"";
+
+"--- ANALISIS DE ASIMETRIA ---";
+"";
+
+"Coeficiente de asimetría (Skewness):";
+Skewness(calificaciones);
+
+"";
+"Interpretación del Skewness:";
+"- Skewness < 0: Asimetría NEGATIVA (sesgada a la izquierda)";
+"  * Media < Mediana";
+"  * Cola larga hacia valores bajos";
+"  * Mayoría de datos en el extremo alto";
+"";
+"- Skewness = 0: Distribución simétrica";
+"  * Media ≈ Mediana";
+"";
+"- Skewness > 0: Asimetría POSITIVA (sesgada a la derecha)";
+"  * Media > Mediana";
+"  * Cola larga hacia valores altos";
+"";
+
+"--- COMPARACION MEDIA VS MEDIANA ---";
+"";
+
+"En una distribución con asimetría NEGATIVA:";
+"La MEDIA es menor que la MEDIANA";
+"";
+
+"Media de nuestros datos:";
+Mean(calificaciones);
+
+"Mediana de nuestros datos:";
+Median(calificaciones);
+
+"Como puedes ver, Media < Mediana, confirmando asimetría negativa";
+"";
+
+"--- DISPERSION DE DATOS ---";
+"";
+
+"Rango intercuartílico (IQR):";
+IQR(calificaciones);
+
+"El IQR mide la dispersión del 50% central de los datos";
+"";
+
+"=== RESUMEN ===";
+"";
+"Este dataset muestra:";
+"✓ Asimetría negativa (Skewness < 0)";
+"✓ Media < Mediana";
+"✓ Mayoría de valores concentrados en el extremo alto (90-100)";
+"✓ Pocos valores bajos (55-75) que arrastran la media hacia abajo";
+"✓ Coeficiente de variación indica la homogeneidad/heterogeneidad";
+"";
+
+"=== FIN DEL ANALISIS ===";

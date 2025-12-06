@@ -58,6 +58,7 @@ tableFunc
     | 'AbsFreqCum'
     | 'RelFreqCum'
     | 'CrossTab'
+    | 'BarChart'
     ;
 
 arglist

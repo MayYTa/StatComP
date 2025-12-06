@@ -17,10 +17,11 @@ public:
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
     T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, T__25 = 26, 
     T__26 = 27, T__27 = 28, T__28 = 29, T__29 = 30, T__30 = 31, T__31 = 32, 
-    T__32 = 33, POW = 34, ADD = 35, SUB = 36, MUL = 37, DIV = 38, INTDIV = 39, 
-    MOD = 40, ASSIGN = 41, LPAR = 42, RPAR = 43, LBRACE = 44, RBRACE = 45, 
-    LBRACK = 46, RBRACK = 47, COMMA = 48, TINT = 49, TFLOAT = 50, TSTRING = 51, 
-    ARRAY = 52, ID = 53, INT = 54, FLOAT = 55, STRING = 56, WS = 57
+    T__32 = 33, T__33 = 34, POW = 35, ADD = 36, SUB = 37, MUL = 38, DIV = 39, 
+    INTDIV = 40, MOD = 41, ASSIGN = 42, LPAR = 43, RPAR = 44, LBRACE = 45, 
+    RBRACE = 46, LBRACK = 47, RBRACK = 48, COMMA = 49, TINT = 50, TFLOAT = 51, 
+    TSTRING = 52, ARRAY = 53, ID = 54, INT = 55, FLOAT = 56, STRING = 57, 
+    WS = 58
   };
 
   enum {

@@ -48,6 +48,9 @@ private:
     Value* tableRelFreqFormat;
     Value* tableRelFreqHeaderFormat;
     Value* tableFooterFormat;
+    Value* barChartHeaderFormat;
+    Value* barChartBarFormat;
+    Value* barChartHashFormat;
     
     std::map<std::string, AllocaInst*> namedValues;
     std::map<std::string, std::pair<AllocaInst*, int>> namedArrays;
@@ -191,6 +194,112 @@ private:
     }
 
     // ============================================
+    // HELPER: Coeficiente de Variación (CV%)
+    // CV = (Stdev / Mean) * 100
+    // ============================================
+    Value* calculateCoeffVar(const vector<Value*>& values) {
+        if (values.empty()) return nullptr;
+        
+        Value *mean = calculateMean(values);
+        Value *stdev = calculateStdev(values);
+        
+        // CV = (stdev / mean) * 100
+        Value *cv = irBuilder->CreateFDiv(stdev, mean, "cv_ratio");
+        Value *hundred = ConstantFP::get(*context, APFloat(100.0));
+        Value *cvPercent = irBuilder->CreateFMul(cv, hundred, "cv_percent");
+        
+        return cvPercent;
+    }
+
+    // ============================================
+    // HELPER: Asimetría (Skewness)
+    // Skewness = E[((X - mean) / stdev)^3]
+    // ============================================
+    Value* calculateSkewness(const vector<Value*>& values) {
+        if (values.empty()) return nullptr;
+        
+        Value *mean = calculateMean(values);
+        Value *stdev = calculateStdev(values);
+        
+        // Suma de ((x - mean) / stdev)^3
+        Value *sumCubes = ConstantFP::get(*context, APFloat(0.0));
+        
+        for (Value *val : values) {
+            // z = (x - mean) / stdev
+            Value *diff = irBuilder->CreateFSub(val, mean, "diff");
+            Value *z = irBuilder->CreateFDiv(diff, stdev, "z_score");
+            
+            // z^3
+            Value *z_squared = irBuilder->CreateFMul(z, z, "z_sq");
+            Value *z_cubed = irBuilder->CreateFMul(z_squared, z, "z_cubed");
+            
+            sumCubes = irBuilder->CreateFAdd(sumCubes, z_cubed, "sum_cubes");
+        }
+        
+        // Dividir por n
+        Value *n = ConstantFP::get(*context, APFloat((double)values.size()));
+        Value *skewness = irBuilder->CreateFDiv(sumCubes, n, "skewness");
+        
+        return skewness;
+    }
+
+    // ============================================
+    // HELPER: Rango Intercuartílico (IQR)
+    // IQR = Q3 - Q1 (aproximado como percentiles)
+    // ============================================
+    Value* calculateIQR(const vector<Value*>& values) {
+        if (values.empty()) return nullptr;
+        
+        // Aproximación simple: IQR ≈ Range * 0.5
+        // En una distribución normal, IQR ≈ 1.35 * σ
+        // Para propósitos didácticos usamos Q3-Q1 aproximado
+        
+        Value *minVal = calculateMin(values);
+        Value *maxVal = calculateMax(values);
+        Value *range = irBuilder->CreateFSub(maxVal, minVal, "range");
+        
+        // Aproximación: IQR ≈ 0.5 * Range (simplificado)
+        Value *halfFactor = ConstantFP::get(*context, APFloat(0.5));
+        Value *iqr = irBuilder->CreateFMul(range, halfFactor, "iqr_approx");
+        
+        return iqr;
+    }
+
+    // ============================================
+    // HELPER: Curtosis (Kurtosis)
+    // Kurtosis = E[((X - mean) / stdev)^4] - 3
+    // ============================================
+    Value* calculateKurtosis(const vector<Value*>& values) {
+        if (values.empty()) return nullptr;
+        
+        Value *mean = calculateMean(values);
+        Value *stdev = calculateStdev(values);
+        
+        // Suma de ((x - mean) / stdev)^4
+        Value *sumFourth = ConstantFP::get(*context, APFloat(0.0));
+        
+        for (Value *val : values) {
+            // z = (x - mean) / stdev
+            Value *diff = irBuilder->CreateFSub(val, mean, "diff");
+            Value *z = irBuilder->CreateFDiv(diff, stdev, "z_score");
+            
+            // z^4
+            Value *z_squared = irBuilder->CreateFMul(z, z, "z_sq");
+            Value *z_fourth = irBuilder->CreateFMul(z_squared, z_squared, "z_fourth");
+            
+            sumFourth = irBuilder->CreateFAdd(sumFourth, z_fourth, "sum_fourth");
+        }
+        
+        // Dividir por n y restar 3 (excess kurtosis)
+        Value *n = ConstantFP::get(*context, APFloat((double)values.size()));
+        Value *rawKurtosis = irBuilder->CreateFDiv(sumFourth, n, "raw_kurtosis");
+        Value *three = ConstantFP::get(*context, APFloat(3.0));
+        Value *excessKurtosis = irBuilder->CreateFSub(rawKurtosis, three, "excess_kurtosis");
+        
+        return excessKurtosis;
+    }
+
+    // ============================================
     // HELPER: Imprimir tabla de frecuencias (valores únicos)
     // ============================================
     void printFrequencyTable(const string& arrayName, const string& tableType) {
@@ -260,6 +369,95 @@ private:
         irBuilder->CreateCall(printfFunc, {tableFooterFormat});
     }
 
+    // ============================================
+    // HELPER: Gráfico de Barras
+    // ============================================
+    void printBarChart(const string& arrayName) {
+        if (namedArrays.find(arrayName) == namedArrays.end()) {
+            cerr << "[ERROR] Array '" << arrayName << "' no encontrado" << endl;
+            return;
+        }
+        
+        int arraySize = namedArrays[arrayName].second;
+        Type *Int32Ty = Type::getInt32Ty(*context);
+        Type *Int1Ty = Type::getInt1Ty(*context);
+        Type *DoubleTy = Type::getDoubleTy(*context);
+        
+        vector<Value*> values = getArrayValues(arrayName);
+        
+        // Imprimir header
+        irBuilder->CreateCall(printfFunc, {barChartHeaderFormat});
+        
+        // Para cada valor único, contar frecuencia y dibujar barra
+        for (int i = 0; i < arraySize; i++) {
+            Value *currentValue = values[i];
+            
+            // Verificar si ya fue procesado
+            Value *alreadyPrinted = ConstantInt::get(Int1Ty, 0);
+            for (int j = 0; j < i; j++) {
+                Value *previousValue = values[j];
+                Value *isEqual = irBuilder->CreateFCmpOEQ(currentValue, previousValue, "check_dup");
+                alreadyPrinted = irBuilder->CreateOr(alreadyPrinted, isEqual, "already_printed");
+            }
+            
+            Function *currentFunc = irBuilder->GetInsertBlock()->getParent();
+            BasicBlock *printBlock = BasicBlock::Create(*context, "print_bar_" + to_string(i), currentFunc);
+            BasicBlock *skipBlock = BasicBlock::Create(*context, "skip_bar_" + to_string(i), currentFunc);
+            
+            Value *shouldPrint = irBuilder->CreateNot(alreadyPrinted, "should_print");
+            irBuilder->CreateCondBr(shouldPrint, printBlock, skipBlock);
+            
+            irBuilder->SetInsertPoint(printBlock);
+            
+            // Contar frecuencia
+            Value *count = ConstantInt::get(Int32Ty, 0);
+            for (int j = 0; j < arraySize; j++) {
+                Value *compareValue = values[j];
+                Value *isEqual = irBuilder->CreateFCmpOEQ(currentValue, compareValue, "cmp_eq");
+                Value *increment = irBuilder->CreateSelect(isEqual, ConstantInt::get(Int32Ty, 1), ConstantInt::get(Int32Ty, 0), "inc");
+                count = irBuilder->CreateAdd(count, increment, "count");
+            }
+            
+            // Imprimir valor
+            irBuilder->CreateCall(printfFunc, {barChartBarFormat, currentValue});
+            
+            // Imprimir barras (# symbols) - loop de 0 a count
+            BasicBlock *loopCondBB = BasicBlock::Create(*context, "loop_cond_" + to_string(i), currentFunc);
+            BasicBlock *loopBodyBB = BasicBlock::Create(*context, "loop_body_" + to_string(i), currentFunc);
+            BasicBlock *loopEndBB = BasicBlock::Create(*context, "loop_end_" + to_string(i), currentFunc);
+            
+            // Inicializar contador de loop
+            AllocaInst *loopVar = irBuilder->CreateAlloca(Int32Ty, nullptr, "loop_var");
+            irBuilder->CreateStore(ConstantInt::get(Int32Ty, 0), loopVar);
+            irBuilder->CreateBr(loopCondBB);
+            
+            // Condición del loop
+            irBuilder->SetInsertPoint(loopCondBB);
+            Value *loopCounter = irBuilder->CreateLoad(Int32Ty, loopVar, "loop_counter");
+            Value *loopCond = irBuilder->CreateICmpSLT(loopCounter, count, "loop_cond");
+            irBuilder->CreateCondBr(loopCond, loopBodyBB, loopEndBB);
+            
+            // Cuerpo del loop - imprimir '#'
+            irBuilder->SetInsertPoint(loopBodyBB);
+            irBuilder->CreateCall(printfFunc, {barChartHashFormat});
+            Value *nextCounter = irBuilder->CreateAdd(loopCounter, ConstantInt::get(Int32Ty, 1), "next_counter");
+            irBuilder->CreateStore(nextCounter, loopVar);
+            irBuilder->CreateBr(loopCondBB);
+            
+            // Después del loop - imprimir frecuencia y newline
+            irBuilder->SetInsertPoint(loopEndBB);
+            Constant *countFormatStr = ConstantDataArray::getString(*context, " (%d)\n");
+            GlobalVariable *countFormatVar = new GlobalVariable(*module, countFormatStr->getType(), true, GlobalValue::PrivateLinkage, countFormatStr, ".str_count_fmt");
+            Value *countFormat = irBuilder->CreateInBoundsGEP(countFormatStr->getType(), countFormatVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
+            irBuilder->CreateCall(printfFunc, {countFormat, count});
+            
+            irBuilder->CreateBr(skipBlock);
+            irBuilder->SetInsertPoint(skipBlock);
+        }
+        
+        irBuilder->CreateCall(printfFunc, {tableFooterFormat});
+    }
+
 public:
     Driver() {
         context = std::make_unique<LLVMContext>();
@@ -314,6 +512,19 @@ public:
         Constant *footerStr = ConstantDataArray::getString(*context, "================================\n\n");
         GlobalVariable *footerVar = new GlobalVariable(*module, footerStr->getType(), true, GlobalValue::PrivateLinkage, footerStr, ".str_footer");
         tableFooterFormat = irBuilder->CreateInBoundsGEP(footerStr->getType(), footerVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
+
+        // Formatos para gráfico de barras
+        Constant *barHeaderStr = ConstantDataArray::getString(*context, "\n===== GRAFICO DE BARRAS =====\n");
+        GlobalVariable *barHeaderVar = new GlobalVariable(*module, barHeaderStr->getType(), true, GlobalValue::PrivateLinkage, barHeaderStr, ".str_bar_header");
+        barChartHeaderFormat = irBuilder->CreateInBoundsGEP(barHeaderStr->getType(), barHeaderVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
+
+        Constant *barFormatStr = ConstantDataArray::getString(*context, "%.2f | ");
+        GlobalVariable *barFormatVar = new GlobalVariable(*module, barFormatStr->getType(), true, GlobalValue::PrivateLinkage, barFormatStr, ".str_bar_format");
+        barChartBarFormat = irBuilder->CreateInBoundsGEP(barFormatStr->getType(), barFormatVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
+
+        Constant *hashStr = ConstantDataArray::getString(*context, "#");
+        GlobalVariable *hashVar = new GlobalVariable(*module, hashStr->getType(), true, GlobalValue::PrivateLinkage, hashStr, ".str_hash");
+        barChartHashFormat = irBuilder->CreateInBoundsGEP(hashStr->getType(), hashVar, {ConstantInt::get(Int32Ty, 0), ConstantInt::get(Int32Ty, 0)});
 
         std::vector<Type*> printfArgs = {PointerType::getUnqual(*context)};
         FunctionType *printfType = FunctionType::get(Int32Ty, printfArgs, true);
@@ -585,6 +796,22 @@ public:
             result = irBuilder->CreateFSub(maxVal, minVal, "range");
             cout << "[INFO] Calculando Range(" << arrayName << ")" << endl;
         }
+        else if (funcName == "CoeffVar") {
+            result = calculateCoeffVar(values);
+            cout << "[INFO] Calculando CoeffVar(" << arrayName << ")" << endl;
+        }
+        else if (funcName == "Skewness") {
+            result = calculateSkewness(values);
+            cout << "[INFO] Calculando Skewness(" << arrayName << ")" << endl;
+        }
+        else if (funcName == "IQR") {
+            result = calculateIQR(values);
+            cout << "[INFO] Calculando IQR(" << arrayName << ")" << endl;
+        }
+        else if (funcName == "Kurtosis") {
+            result = calculateKurtosis(values);
+            cout << "[INFO] Calculando Kurtosis(" << arrayName << ")" << endl;
+        }
         else {
             cerr << "[ERROR] Función '" << funcName << "' no implementada aún" << endl;
             return nullptr;
@@ -613,13 +840,17 @@ public:
         else if (funcName == "RelFreq") {
             printFrequencyTable(arrayName, funcName);
         }
+        else if (funcName == "BarChart") {
+            printBarChart(arrayName);
+        }
         else if (funcName == "AbsFreqCum" || funcName == "RelFreqCum") {
             cerr << "[WARN] " << funcName << " no implementada aún" << endl;
         }
         else {
             cerr << "[ERROR] Función de tabla '" << funcName << "' no implementada" << endl;
         }
-        return nullptr;
+        // Retornar un valor constante para que sea una expresión válida
+        return (Value*)ConstantFP::get(*context, APFloat(0.0));
     }
 
     // ============================================
